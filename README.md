@@ -1,8 +1,7 @@
----
 
-title: "Bounty Hacker CTF: Write-up"  
-author: moncef fennan  
-date: 2025-11-03  
+# Bounty Hacker CTF: Write-up
+
+_Author: moncef fennan — Date: 2025-11-03_
 tags:
 
 - ctf
@@ -22,17 +21,11 @@ tags:
 - privesc
     
 
----
-
-# Bounty Hacker CTF: Write-up
-
-_Author: moncef fennan — Date: 2025-11-03_
-
 ## Table of Contents
 
-- [🚀 Deploy & Scan](#deploy-scan)
+- [🚀 Deploy & Scan](#-deploy--scan)
     
-- [🕵️ Service Enumeration & Flag Hunting(#service-enumeration-flag-hunting)
+- [🕵️ Service Enumeration & Flag Hunting](#service-enumeration-flag-hunting)
     
     - [Finding the task list](#finding-the-task-list)
         
@@ -42,17 +35,19 @@ _Author: moncef fennan — Date: 2025-11-03_
         
     - [Privilege escalation & root flag](#privilege-escalation--root-flag)
         
-- [🏁 Conclusion](#conclusion)
+- [🏁 Conclusion](#-conclusion)
     
 
 ---
 
 ## 🚀 Deploy & Scan
 
-Deployed the machine and ran a port scan to see what’s open.
+`Deployed the machine and ran a port scan to see what’s open.`
+
+<img src="/images/nmap-scan.png" alt="nmap-scan">
 
 (No answers needed here.)
-<img src="nmap-scan.png" alt="nmap-scan">
+
 
 ---
 
@@ -60,16 +55,17 @@ Deployed the machine and ran a port scan to see what’s open.
 
 ### Finding the task list
 
-We tried gobuster against port 80 but hit dead ends. So we checked FTP as anonymous and found two files.
-<img src="gobuster rabbit hole.png" alt="gobuster scan">
+`We tried gobuster against port 80 but hit dead ends. So we checked FTP as anonymous and found two files.`
 
-<img src="ftp access.png" alt="ftp">
+<img src="/images/gobuster rabbit hole.png" alt="gobuster scan">
+
+<img src="/images/ftp access.png" alt="ftp">
 
 > [!NOTE]  
 > **Question:** Who wrote the task list?  
 > **Answer:** `lin`
 
-Steps: login to FTP anonymously, download the files, one contains the task list which shows `lin` as the author.
+`Steps: login to FTP anonymously, download the files, one contains the task list which shows `lin` as the author.`
 
 
 
@@ -77,15 +73,17 @@ Steps: login to FTP anonymously, download the files, one contains the task list 
 
 ### Brute-force SSH
 
-The second FTP file (`locks.txt`) contains some passwords. From our nmap scan, we know SSH is open.
-<img src="cat locks.txt.png" alt="locks.txt">
+`The second FTP file (`locks.txt`) contains some passwords. From our nmap scan, we know SSH is open.`
+
+<img src="/images/cat locks.txt.png" alt="locks.txt">
 
 > [!NOTE]  
 > **Question:** What service can you brute-force with the text file found?  
 > **Answer:** `SSH`
 
-We used `hydra` with username `lin` and the password list to brute-force the SSH login.
-<img src="password found.png" alt="hydra">
+`We used `hydra` with username `lin` and the password list to brute-force the SSH login.`
+
+<img src="/images/password found.png" alt="hydra">
 
 > [!NOTE]  
 > **Question:** What is the user's password?  
@@ -95,8 +93,9 @@ We used `hydra` with username `lin` and the password list to brute-force the SSH
 
 ### User login & flag
 
-SSH into the machine using `lin:RedDr4gonSynd1cat3` and check the Desktop.
-<img src="user.txt.png" alt="first flag">
+`SSH into the machine using `lin:RedDr4gonSynd1cat3` and check the Desktop.`
+
+<img src="/images/user.txt.png" alt="first flag">
 
 > [!NOTE]  
 > **Question:** What is the user flag?  
@@ -106,19 +105,19 @@ SSH into the machine using `lin:RedDr4gonSynd1cat3` and check the Desktop.
 
 ### Privilege escalation & root flag
 
-Check allowed sudo commands:
+`Check allowed sudo commands:`
 
 ```bash
 sudo -l
 ```
 
-We saw we can execute `/bin/tar` without a password. Googling `sudo tar privesc` shows the command to escalate.
+`We saw we can execute `/bin/tar` without a password. Googling `sudo tar privesc` shows the command to escalate.`
 
 ```bash
 sudo tar -cf /dev/null /dev/null --checkpoint=1 --checkpoint-action=exec=/bin/sh
 ```
 
-<img src="root.txt.png" alt="root flag">
+<img src="/images/root.txt.png" alt="root flag">
 
 > [!NOTE]  
 > **Question:** What is the root flag?  
@@ -128,7 +127,7 @@ sudo tar -cf /dev/null /dev/null --checkpoint=1 --checkpoint-action=exec=/bin/sh
 
 ## 🏁 Conclusion
 
-This box was fun and straightforward:
+`This box was fun and straightforward:`
 
 - Enumerate FTP anonymously to find credentials and task info.
     
